@@ -1,33 +1,74 @@
 from __future__ import annotations
+
+from typing import Any, Optional
+import base64
 import requests
 
-def get_token(encoded_key: str = dnb_key) -> str:
-    url = "https://plus.dnb.com/v3/token"
 
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": f"Basic {encoded_key}",
-        "Cache-Control": "no-cache"
-    }
+class DnBClient:
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        token_url: str,
+        base_url: str,
+    ):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.token_url = token_url
+        self.base_url = base_url.rstrip("/")
 
-    payload = {"grant_type": "client_credentials"}
+    def _basic_auth_header(self) -> str:
+        raw = f"{self.client_id}:{self.client_secret}"
+        encoded = base64.b64encode(raw.encode("utf-8")).decode("utf-8")
+        return f"Basic {encoded}"
+        
+    def get_token(self) -> str:
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": self._basic_auth_header(),
+            "Cache-Control": "no-cache"
+        }
+        
+        response = requests.post(
+            self.token_url, 
+            headers=headers, 
+            data={"grant_type": "client_credentials"},
+            timeout=60,
+        )
+        response.raise_for_status()
+        
+        payload = response.json()
+        token = payload.get("access_token")
+        if not token:
+            raise ValueError(f"No access_token in response: {response.text}")
+        return token 
 
-    response = requests.post(url, headers=headers, data=payload)
-    response.raise_for_status()
+    def cleanse_match(
+            self,
+            company_name: str,
+            country_code: str = "US",
+            candidate_maximum_quantity: int = 1,
+            extra_params: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
+            token = self.get_token()
+            url = f"{self.base_url}/v1/match/cleanseMatch"
+    
+            params: dict[str, Any] = {
+                "name": company_name,
+                "countryISOAlpha2Code": country_code,
+                "candidateMaximumQuantity": candidate_maximum_quantity,
+            }
+            if extra_params:
+                params.update(extra_params)
+    
+            headers = {
+                "Accept": "application/json",
+                "Authorization": f"Bearer {token}",
+            }
+    
+            response = requests.get(url, headers=headers, params=params, timeout=60)
+            response.raise_for_status()
+            return response.json()
 
-    return response.json().get("access_token")
 
-def cleanse_match(token: str, company_name: str) -> dict:
-    url = "https://plus.dnb.com/v1/match/cleanseMatch"
-
-    headers = {
-        "Accept": "application/json",
-        "Authorization": f"Bearer {token}"
-    }
-
-    params = {"name": company_name, "countryISOAlpha2Code": "US", "candidateMaximumQuantity": 1}
-
-    response = requests.get(url, headers=headers, params=params)
-    response.raise_for_status()
-
-    return response.json()
