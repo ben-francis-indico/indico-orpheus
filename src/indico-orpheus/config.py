@@ -27,7 +27,10 @@ class Settings:
     swissre_client_id: str
     swissre_token_url: str
     catnet_base_url: str
-
+    dnb_client_id: str
+    dnb_client_secret: str
+    dnb_token_url: str
+    dnb_base_url: str
 
 
 def get_settings(host_option: int) -> Settings:
@@ -39,15 +42,14 @@ def get_settings(host_option: int) -> Settings:
     workspace_password = os.getenv("WORKSPACE_PASSWORD")
     github_token = os.getenv("GITHUB_TOKEN")
     google_api_key = os.getenv("G_API")
+    catnet_base_url = os.getenv("CATNET_BASE_URL")
+    swissre_client_id = os.getenv("SWISSRE_CLIENT_ID")
+    swissre_token_url = os.getenv("SWISSRE_TOKEN_URL")
     swissre_private_key_path = Path(os.getenv("SWISSRE_PRIVATE_KEY_PATH", "private.key"))
-
-    # These are still hard-coded from your original script, but surfaced here so they are easy to move to env later.
-    swissre_client_id = os.getenv("SWISSRE_CLIENT_ID", "0oagnqgsr45l8Nmu70i7")
-    swissre_token_url = os.getenv(
-        "SWISSRE_TOKEN_URL",
-        "https://identity.swissre.com/oauth2/ausaz28lw2bd82Jo50i7/v1/token",
-    )
-    catnet_base_url = os.getenv("CATNET_BASE_URL", "https://catnet.api-np.swissre.com/demo")
+    dnb_client_id = os.getenv("DNB_CLIENT_ID")
+    dnb_client_secret = os.getenv("DNB_CLIENT_SECRET")
+    dnb_token_url = os.getenv("DNB_TOKEN_URL")
+    dnb_base_url = os.getenv("DNB_BASE_URL")
 
     missing = []
     if not workspace_password:
@@ -70,4 +72,8 @@ def get_settings(host_option: int) -> Settings:
         swissre_client_id=swissre_client_id,
         swissre_token_url=swissre_token_url,
         catnet_base_url=catnet_base_url,
+        dnb_client_id = dnb_client_id
+        dnb_client_secret = dnb_client_secret
+        dnb_token_url = dnb_token_url
+        dnb_base_url = dnb_base_url
     )
