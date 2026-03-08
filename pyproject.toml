@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "indico-orpheus"
+version = "0.1.0"
+description = "Reusable automation utilities and workflows for Indico-related scripts"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx",
+    "python-dotenv",
+    "PyGithub",
+    "pandas",
+    "requests",
+    "PyJWT",
+    "geopy",
+    "googlemaps",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
