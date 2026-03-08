@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "indico-orpheus"
 version = "0.1.0"
-description = "Reusable automation utilities and workflows for Indico-related scripts"
+description = "Reusable automation utilities and workflows for Indico"
 requires-python = ">=3.11"
 dependencies = [
     "httpx",
