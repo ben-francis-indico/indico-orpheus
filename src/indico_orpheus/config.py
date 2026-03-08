@@ -72,8 +72,8 @@ def get_settings(host_option: int) -> Settings:
         swissre_client_id=swissre_client_id,
         swissre_token_url=swissre_token_url,
         catnet_base_url=catnet_base_url,
-        dnb_client_id = dnb_client_id
-        dnb_client_secret = dnb_client_secret
-        dnb_token_url = dnb_token_url
-        dnb_base_url = dnb_base_url
+        dnb_client_id = dnb_client_id,
+        dnb_client_secret = dnb_client_secret,
+        dnb_token_url = dnb_token_url,
+        dnb_base_url = dnb_base_url,
     )
