@@ -7,7 +7,7 @@ from indico_orpheus.clients.dnb import DnBClient
 
 
 def main() -> None:
-    settings = get_settings(2)
+    settings = get_settings(1,2)
 
     client = DnBClient(
         client_id=settings.dnb_client_id,
@@ -25,7 +25,7 @@ def main() -> None:
     print(f"Token preview: {token[:20]}...")
 
     result = client.cleanse_match("Microsoft")
-    print("Endpoint call OK")
+    print("Endpoint call OK - Cleanse Match test...")
     print(json.dumps(result, indent=2)[:3000])
 
 

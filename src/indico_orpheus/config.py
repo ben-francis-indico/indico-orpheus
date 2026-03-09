@@ -7,12 +7,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-HOST_CHOICES = {
+WORKSPACE_HOST_CHOICES = {
     1: ("https://insights.ins-try.us-east-1.indico-prod.indico.io/", "ben.francis@indicodata.ai"),
     2: ("https://insights.ins-try-eu.eu-west-2.indico-prod.indico.io/", "ben.francis@indicodata.ai"),
     3: ("https://insights.ins-enrich.us-east-2.indico-dev.indico.io/", "ben.francis@indico.io"),
     4: ("https://insights.ins-aviva.us-east-2.indico-prospect.indico.io/", "ben.francis@indico.io"),
     5: ("https://insights.ins-claims-pinned.us-east-2.indico-dev.indico.io/", "ben.francis@indico.io"),
+}
+
+WORKFLOW_HOST_CHOICES = {
+    1: ("try.indico.io", "TRY_TOKEN_PATH"),
 }
 
 
@@ -31,13 +35,20 @@ class Settings:
     dnb_client_secret: str
     dnb_token_url: str
     dnb_base_url: str
+    workflow_host: str
+    workflow_token: Path
 
 
-def get_settings(host_option: int) -> Settings:
+def get_settings(workflow_option: int, workspace_option: int) -> Settings:
     try:
-        workspace_host, workspace_email = HOST_CHOICES[host_option]
+        workspace_host, workspace_email = WORKSPACE_HOST_CHOICES[workspace_option]
     except KeyError as exc:
-        raise ValueError(f"Invalid host option: {host_option}. Valid options: {sorted(HOST_CHOICES)}") from exc
+        raise ValueError(f"Invalid host option: {workspace_option}. Valid options: {sorted(WORKSPACE_HOST_CHOICES)}") from exc
+
+    try:
+        workflow_host, workflow_token_path = WORKFLOW_HOST_CHOICES[workflow_option]
+    except KeyError as exc:
+        raise ValueError(f"Invalid host option: {workflow_option}. Valid options: {sorted(WORKFLOW_HOST_CHOICES)}") from exc
 
     workspace_password = os.getenv("WORKSPACE_PASSWORD")
     github_token = os.getenv("GITHUB_TOKEN")
@@ -50,6 +61,7 @@ def get_settings(host_option: int) -> Settings:
     dnb_client_secret = os.getenv("DNB_CLIENT_SECRET")
     dnb_token_url = os.getenv("DNB_TOKEN_URL")
     dnb_base_url = os.getenv("DNB_BASE_URL")
+    workflow_token = os.getenv(workflow_token_path)
 
     missing = []
     if not workspace_password:
@@ -76,4 +88,6 @@ def get_settings(host_option: int) -> Settings:
         dnb_client_secret = dnb_client_secret,
         dnb_token_url = dnb_token_url,
         dnb_base_url = dnb_base_url,
+        workflow_host = workflow_host,
+        workflow_token = workflow_token
     )

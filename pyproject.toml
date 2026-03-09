@@ -16,6 +16,7 @@ dependencies = [
     "PyJWT",
     "geopy",
     "googlemaps",
+    "indico-client"
 ]
 
 [tool.setuptools]

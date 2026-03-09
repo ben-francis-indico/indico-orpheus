@@ -56,6 +56,26 @@ class SwissReClient:
             raise SwissReAuthError(f"No access_token in response: {payload}")
         return token
 
+    def health(
+        self,
+        version: str = "v2",
+        timeout: int = 60,
+    ) -> Any:
+        token = self.get_access_token()
+        url = f"{self.catnet_base_url}/health"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        }
+        response = requests.get(
+            url,
+            headers=headers,
+            params={"version": version},
+            timeout=timeout,
+        )
+        return response.json()
+
     def post_batch_analysis(
         self,
         body: list[dict[str, Any]],
@@ -75,4 +95,5 @@ class SwissReClient:
             params={"version": version},
             json=body,
             timeout=timeout,
+        )
         return response.json()
