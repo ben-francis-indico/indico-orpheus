@@ -4,6 +4,7 @@ import json
 
 from indico_orpheus.config import get_settings
 from indico_orpheus.clients.dnb import DnBClient
+from indico_orpheus.services.json_work import flatten_json
 
 
 def main() -> None:
@@ -24,10 +25,12 @@ def main() -> None:
     print("Token retrieved OK")
     print(f"Token preview: {token[:20]}...")
 
-    result = client.cleanse_match("Microsoft")
+    result = client.cleanse_match("Indico Data Solutions, Inc.")
     print("Endpoint call OK - Cleanse Match test...")
-    print(json.dumps(result, indent=2)[:3000])
+    print(json.dumps(result, indent=2)[:100])
 
+    result_flat = flatten_json(result)
+    duns = result_flat.get("matchCandidates[0].organization.duns")
 
 if __name__ == "__main__":
     main()

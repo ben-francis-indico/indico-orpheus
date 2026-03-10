@@ -1,0 +1,9 @@
+httpx
+python-dotenv
+PyGithub
+pandas
+requests
+PyJWT
+geopy
+googlemaps
+indico-client

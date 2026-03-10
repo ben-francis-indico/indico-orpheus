@@ -89,5 +89,5 @@ def get_settings(workflow_option: int, workspace_option: int) -> Settings:
         dnb_token_url = dnb_token_url,
         dnb_base_url = dnb_base_url,
         workflow_host = workflow_host,
-        workflow_token = workflow_token
+        workflow_token = workflow_token,
     )

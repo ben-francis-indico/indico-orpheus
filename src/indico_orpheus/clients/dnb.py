@@ -71,4 +71,31 @@ class DnBClient:
             response.raise_for_status()
             return response.json()
 
+    def get_company_report(
+            self,
+            company_name: str,
+            country_code: str = "US",
+            candidate_maximum_quantity: int = 1,
+            extra_params: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
+        token = self.get_token()
+        url = f"{self.base_url}/v1/match/cleanseMatch"
+
+        params: dict[str, Any] = {
+            "name": company_name,
+            "countryISOAlpha2Code": country_code,
+            "candidateMaximumQuantity": candidate_maximum_quantity,
+        }
+        if extra_params:
+            params.update(extra_params)
+
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {token}",
+        }
+
+        response = requests.get(url, headers=headers, params=params, timeout=60)
+        response.raise_for_status()
+        return response.json()
+
 
