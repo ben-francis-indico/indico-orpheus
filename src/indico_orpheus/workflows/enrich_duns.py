@@ -3,15 +3,17 @@ from __future__ import annotations
 from indico_orpheus.clients.insights import AsyncInsightsClient
 from indico_orpheus.clients.dnb import DnBClient
 from indico_orpheus.config import get_settings
+from indico_orpheus.services.workspace_submission import sub_values, push_values
+from indico_orpheus.services.json_work import flatten_json
 
 async def run_duns_enrichment(
     submission_id: int,
-    host_option: int,
-`
-    column_names: list[str],
-    table_id: str = "CatNet",
+    workflow_option: int,
+    workspace_option: int,
+    insured_name_id: str,
+    workspace_duns_id: str,
 ) -> dict:
-    settings = get_settings(host_option)
+    settings = get_settings(workflow_option, workspace_option)
 
     insights_client = AsyncInsightsClient(
         host=settings.workspace_host,
@@ -19,34 +21,27 @@ async def run_duns_enrichment(
         password=settings.workspace_password,
     )
 
-    geocoder = GeocoderService(api_key=settings.google_api_key)
-    swissre_client = SwissReClient(
-        client_id=settings.swissre_client_id,
-        token_url=settings.swissre_token_url,
-        catnet_base_url=settings.catnet_base_url,
-        private_key_path=settings.swissre_private_key_path,
-    )
-
     await insights_client.authenticate()
 
+    dnb_client: DnBClient = DnBClient(
+        client_id=settings.dnb_client_id,
+        client_secret=settings.dnb_client_secret,
+        token_url=settings.dnb_token_url,
+        base_url=settings.dnb_base_url,
+    )
+
+    dnb_client.get_token()
+
     try:
-        df_loc = await sub_values(insights_client, submission_id, column_names)
-        df_loc[["location_latitude", "location_longitude", "location_full_address"]] = df_loc[column_names].apply(
-            lambda row: geocoder.geocode_address(", ".join(row.dropna().astype(str))),
-            axis=1,
-        )
+        insured_name = await sub_values(insights_client, submission_id, insured_name_id)
 
-        layers = await get_required_layers(insights_client, submission_id)
-        wide = catnet_batch_analysis_df_wide(
-            df_loc[["location_latitude", "location_longitude", "location_full_address"]],
-            layers,
-            swissre_client=swissre_client,
-            lat_col="location_latitude",
-            lon_col="location_longitude",
-        )
+        result = dnb_client.cleanse_match(insured_name.loc[0])
+        flat = flatten_json(result)
+        duns = flat.get("matchCandidates[0].organization.duns")
 
-        result = df_to_graphql_variables(wide, submission_id=str(submission_id), table_id=table_id)
-        await push_enrich(insights_client, result)
-        return result
+        sanctions = dnb_client.get_sanctions(duns,"NoMonitoring")
+
+        await push_values(insights_client, submission_id, workspace_duns_id, duns)
+        return duns
     finally:
         await insights_client.aclose()

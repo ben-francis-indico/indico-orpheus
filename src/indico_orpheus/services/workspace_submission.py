@@ -56,6 +56,7 @@ async def query(insights_client: AsyncInsightsClient, query: str, variables: dic
     return response
 
 
+
 async def push_table(insights_client: AsyncInsightsClient, variables: dict[str, Any]) -> Any:
     mutation = """
         mutation BaseTableViewer_SetTableValues($submissionId: ID!, $tableId: String!, $cellInputs: [TableCellInput!]!) {
@@ -122,6 +123,21 @@ async def push_table(insights_client: AsyncInsightsClient, variables: dict[str, 
         }
     """
 
+    response = await insights_client.call_gql(mutation, variables=variables)
+    print(f"Response:\n{response}")
+    return response
+
+
+
+async def push_values(insights_client: AsyncInsightsClient, submission_id: int, field_id: str, value: str) -> Any:
+    mutation = """
+    mutation Mutation($submissionId: ID!, $fieldId: String!, $value: Value!) {
+      createSubmissionFieldValue(submissionId: $submissionId, fieldId: $fieldId, value: $value) {
+        id
+        }
+      }
+    """
+    variables = {"submissionId": submission_id, "fieldId": field_id, "value": value}
     response = await insights_client.call_gql(mutation, variables=variables)
     print(f"Response:\n{response}")
     return response

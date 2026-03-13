@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import json
 
-from indico import IndicoClient
-
 from indico_orpheus.config import get_settings
 from indico_orpheus.clients.intake import IntakeClient
 

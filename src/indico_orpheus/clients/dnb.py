@@ -71,7 +71,7 @@ class DnBClient:
             response.raise_for_status()
             return response.json()
 
-    def get_company_report(
+    def get_company_report( #WIP
             self,
             company_name: str,
             country_code: str = "US",
@@ -95,6 +95,32 @@ class DnBClient:
         }
 
         response = requests.get(url, headers=headers, params=params, timeout=60)
+        response.raise_for_status()
+        return response.json()
+
+    def get_sanctions( #WIP
+            self,
+            duns: str,
+            screening_monitor: str = "NoMonitoring",
+            extra_params: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
+        token = self.get_token()
+        url = f"{self.base_url}/v1/screening/inquiries"
+
+        params: dict[str, Any] = {
+            "duns": duns,
+            "screening_monitor": screening_monitor,
+        }
+        if extra_params:
+            params.update(extra_params)
+
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {token}",
+        }
+        url_f="https://plus.dnb.com/v1/screening/inquiries?customerTransactionID=1234&screeningMonitoringMode=DataAndMonitoring&reviewStatus=Reviewed&caseID=8a71d7fe-0847-abc-8fb1-f486a50bdf20&inquiryIDs=8a71d7fe-0847-476a-8fb1-f486a50bdf20&duns=804735132&pageSize=25&pageNumber=2&isInitialInquiry=true&lastUpdatedStartDate=2022-01-01&lastUpdatedEndDate=2022-02-01&startDate=2019-02-01&endDate=2019-03-01"
+        #response = requests.get(url, headers=headers, params=params, timeout=60)
+        response = requests.get(url_f, headers=headers, params=params, timeout=60)
         response.raise_for_status()
         return response.json()
 
