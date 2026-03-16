@@ -1491,14 +1491,16 @@ def enrich_swissre():
         payload = request.get_json(force=True) or {}
 
         submission_id = _parse_int(payload.get("submission_id"), "submission_id")
-        host_option = _parse_int(payload.get("host_option"), "host_option")
+        workflow_option = _parse_int(payload.get("workflow_option"), "workflow_option")
+        workspace_option = _parse_int(payload.get("workspace_option"), "workspace_option")
         column_names = _parse_column_names(payload.get("column_names"))
         table_id = str(payload.get("table_id", "CatNet")).strip() or "CatNet"
 
         result = asyncio.run(
             run_swissre_enrichment(
                 submission_id=submission_id,
-                host_option=host_option,
+                workflow_option=workflow_option,
+                workspace_option=workspace_option,
                 column_names=column_names,
                 table_id=table_id,
             )
