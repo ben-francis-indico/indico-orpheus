@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 from io import BytesIO, StringIO
 from flask import Blueprint, request, jsonify, render_template, send_file
 from ruamel.yaml import YAML
@@ -16,13 +17,42 @@ from indico.client.request import GraphQLRequest
 import subprocess
 import copy
 import asyncio
+from pathlib import Path
+from importlib import import_module
 
-#from indico_orpheus.workflows.enrich_duns import run_duns_enrichment
-#from indico_orpheus.workflows.enrich_swissre import run_swissre_enrichment
+
+def _load_enrichment_functions():
+    """
+    Load workflow enrichment functions without requiring package installation.
+
+    PythonAnywhere commonly runs this file directly from source. In that case,
+    ensure the local ./src directory is on sys.path and then import workflows.
+    """
+    try:
+        duns_mod = import_module("indico_orpheus.workflows.enrich_duns")
+        swissre_mod = import_module("indico_orpheus.workflows.enrich_swissre")
+        return duns_mod.run_duns_enrichment, swissre_mod.run_swissre_enrichment
+    except ModuleNotFoundError:
+        current_file = Path(__file__).resolve()
+        project_root = current_file.parents[4]
+        src_root = project_root / "src"
+
+        if src_root.exists():
+            src_root_str = str(src_root)
+            if src_root_str not in sys.path:
+                sys.path.insert(0, src_root_str)
+
+        duns_mod = import_module("indico_orpheus.workflows.enrich_duns")
+        swissre_mod = import_module("indico_orpheus.workflows.enrich_swissre")
+        return duns_mod.run_duns_enrichment, swissre_mod.run_swissre_enrichment
+
+
+run_duns_enrichment, run_swissre_enrichment = _load_enrichment_functions()
 
 # Load env
 load_dotenv(os.path.expanduser("~/.env"))
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+load_dotenv(Path(__file__).resolve().parents[4] / ".env")
 
 bp = Blueprint("ben_app", __name__, url_prefix="/ben-app")
 
