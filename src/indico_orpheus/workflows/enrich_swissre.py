@@ -10,11 +10,12 @@ from indico_orpheus.services.submissions import get_required_layers, push_enrich
 
 async def run_swissre_enrichment(
     submission_id: int,
-    host_option: int,
+    workflow_option: int,
+    workspace_option: int,
     column_names: list[str],
     table_id: str = "CatNet",
 ) -> dict:
-    settings = get_settings(host_option)
+    settings = get_settings(workflow_option, workspace_option)
 
     insights_client = AsyncInsightsClient(
         host=settings.workspace_host,

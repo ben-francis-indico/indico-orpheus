@@ -20,12 +20,25 @@ class SwissReClient:
         catnet_base_url: str,
         private_key_path: Path,
     ):
+        missing = []
+        if not client_id:
+            missing.append("SWISSRE_CLIENT_ID")
+        if not token_url:
+            missing.append("SWISSRE_TOKEN_URL")
+        if not catnet_base_url:
+            missing.append("CATNET_BASE_URL")
+
+        if missing:
+            raise ValueError(f"Missing required SwissRe settings: {', '.join(missing)}")
+
         self.client_id = client_id
         self.token_url = token_url
         self.catnet_base_url = catnet_base_url.rstrip("/")
         self.private_key_path = private_key_path
 
     def _read_private_key(self) -> str:
+        if not self.private_key_path.exists():
+            raise FileNotFoundError(f"SwissRe private key file not found: {self.private_key_path}")
         return self.private_key_path.read_text(encoding="utf-8")
 
     def build_client_assertion(self, expires_in_minutes: int = 60) -> str:
